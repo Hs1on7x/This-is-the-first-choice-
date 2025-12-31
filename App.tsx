@@ -1,39 +1,61 @@
+
 import React, { useState } from 'react';
-import { ScreenType, UserProfile, AccountType, KYCStatus, ConsultationSession, ContractDraft, ContractParty, ContractFile, FinancialTerms } from './types';
+import { ScreenType, UserProfile, AccountType, ConsultationSession, ContractDraft, ContractParty, ContractFile, FinancialTerms, DisputeCase, Installment, SubscriptionPlan } from './types';
+
+// Auth & Setup
 import WelcomeScreen from './components/WelcomeScreen';
 import SignUpScreen from './components/SignUpScreen';
 import LoginScreen from './components/LoginScreen';
-import OTPVerification from './components/OTPVerification';
 import ProfileSetup from './components/ProfileSetup';
 import KYCVerification from './components/KYCVerification';
+
+// Core
 import Dashboard from './components/Dashboard';
+import NotificationsScreen from './components/NotificationsScreen';
+import SettingsScreen from './components/SettingsScreen';
+import HelpSupportScreen from './components/HelpSupportScreen';
+
+// Consultations
 import ChatAIScreen from './components/ChatAIScreen';
+import AISessionPayment from './components/AISessionPayment';
+import AISessionConfirmation from './components/AISessionConfirmation';
+import SubscriptionManagement from './components/SubscriptionManagement';
 import HumanConsultationRequest from './components/HumanConsultationRequest';
+import LawyerSelectionScreen from './components/LawyerSelectionScreen';
+import LawyerFullProfileScreen from './components/LawyerFullProfileScreen';
 import WaitingRoom from './components/WaitingRoom';
 import LiveConsultationRoom from './components/LiveConsultationRoom';
 import ConsultationSummary from './components/ConsultationSummary';
+
+// Contracts Flow
 import ContractTypeSelection from './components/ContractTypeSelection';
 import ContractPartiesSetup from './components/ContractPartiesSetup';
+import PartyLegalProfileScreen from './components/PartyLegalProfileScreen';
 import ContractTermsScreen from './components/ContractTermsScreen';
 import ContractDocumentsScreen from './components/ContractDocumentsScreen';
 import AIContractGenerationScreen from './components/AIContractGenerationScreen';
 import SmartContractEditorScreen from './components/SmartContractEditorScreen';
 import AIContractRiskAnalysisScreen from './components/AIContractRiskAnalysisScreen';
 import ContractNegotiationScreen from './components/ContractNegotiationScreen';
-import ContractCommunicationScreen from './components/ContractCommunicationScreen';
-import CommunicationAnalysisDashboard from './components/CommunicationAnalysisDashboard';
 import ContractFinancialTermsScreen from './components/ContractFinancialTermsScreen';
-import ContractAnalysisScreen from './components/ContractAnalysisScreen';
-import DisputeManagerScreen from './components/DisputeManagerScreen';
-import DisputeEvaluationScreen from './components/DisputeEvaluationScreen';
-import MonitoringScreen from './components/MonitoringScreen';
-import EscrowManagementDashboard from './components/EscrowManagementDashboard';
-import DigitalWallet from './components/DigitalWallet';
 import ContractFinalReview from './components/ContractFinalReview';
+import PaymentBeforeSignature from './components/PaymentBeforeSignature';
 import DigitalSignatureCeremony from './components/DigitalSignatureCeremony';
 import ContractStatusDashboard from './components/ContractStatusDashboard';
+import MonitoringScreen from './components/MonitoringScreen';
+
+// Disputes Flow
+import DisputeManagerScreen from './components/DisputeManagerScreen';
 import OpenDispute from './components/OpenDispute';
+import DisputeEvaluationScreen from './components/DisputeEvaluationScreen';
+import DisputeEvidenceExchange from './components/DisputeEvidenceExchange';
 import DisputeResolutionDecision from './components/DisputeResolutionDecision';
+
+// Financial & Escrow
+import DigitalWallet from './components/DigitalWallet';
+import EscrowManagementDashboard from './components/EscrowManagementDashboard';
+import PaymentDetailsScreen from './components/PaymentDetailsScreen';
+import ContractTransactionsScreen from './components/ContractTransactionsScreen';
 
 const App: React.FC = () => {
   const [currentScreen, setCurrentScreen] = useState<ScreenType>(ScreenType.WELCOME);
@@ -43,57 +65,43 @@ const App: React.FC = () => {
     kycStatus: 'unverified'
   });
   
+  const [walletBalance, setWalletBalance] = useState(45250);
+  const [activeDispute, setActiveDispute] = useState<any>(null);
+  const [contractDraft, setContractDraft] = useState<Partial<ContractDraft>>({ id: 'CON-' + Math.floor(Math.random()*10000), parties: [], documents: [] });
+  const [selectedInstallment, setSelectedInstallment] = useState<Installment | null>(null);
+  const [selectedLawyer, setSelectedLawyer] = useState<any>(null);
+  const [selectedParty, setSelectedParty] = useState<ContractParty | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
   const [activeSession, setActiveSession] = useState<ConsultationSession | null>(null);
-  const [contractDraft, setContractDraft] = useState<Partial<ContractDraft>>({
-    id: 'CON-1234',
-    type: 'عقد خدمات تقنية',
-    parties: [],
-    terms: {},
-    financials: {
-      totalAmount: 50000,
-      currency: 'SAR',
-      paymentMethod: 'installments',
-      installments: [{ id: '1', amount: 25000, dueDate: '2025-01-01', condition: 'عند التوقيع' }, { id: '2', amount: 25000, dueDate: '2025-02-01', condition: 'عند التسليم' }],
-      vatApplicable: true,
-      escrowEnabled: true,
-      escrowConditions: ['موافقة الطرفين'],
-      latePenaltyEnabled: true,
-      penaltyType: 'percentage',
-      penaltyValue: 0.1,
-      penaltyCap: 5000,
-      acceptedPaymentMethods: ['Apple Pay']
-    }
-  });
+  
+  const [consultationContext, setConsultationContext] = useState<any>(null);
 
-  const navigateTo = (screen: ScreenType) => {
+  const navigateTo = (screen: ScreenType, data?: any) => {
+    if (data) {
+      if (screen === ScreenType.PAYMENT_DETAILS) setSelectedInstallment(data);
+      if (screen === ScreenType.LAWYER_FULL_PROFILE) setSelectedLawyer(data);
+      if (screen === ScreenType.PARTY_LEGAL_PROFILE) setSelectedParty(data);
+      if (screen === ScreenType.LIVE_CONSULTATION) setActiveSession(data);
+      if (screen === ScreenType.DISPUTE_RESOLUTION_DECISION) setActiveDispute(data);
+      if (screen === ScreenType.AI_SESSION_PAYMENT) setSelectedPlan(data);
+    }
     setCurrentScreen(screen);
   };
 
-  const handleAuthSuccess = (data: Partial<UserProfile>) => {
-    setUserProfile(prev => ({ 
-      ...prev, 
-      ...data, 
-      legalName: data.accountType === AccountType.COMPANY ? 'شركة الحلول التقنية' : 'محمد بن عبدالله',
-      kycStatus: 'verified' 
-    }));
-    navigateTo(ScreenType.DASHBOARD);
+  const handlePaymentSuccess = () => {
+    if (consultationContext) {
+      setConsultationContext({ ...consultationContext, isPaid: true });
+      setCurrentScreen(ScreenType.LAWYER_SELECTION);
+    } else {
+      setCurrentScreen(ScreenType.DASHBOARD);
+    }
   };
 
-  const handleSignUpInit = (data: Partial<UserProfile>) => {
-    setUserProfile(prev => ({ ...prev, ...data }));
-    navigateTo(ScreenType.OTP_VERIFICATION);
-  };
-
-  const startContractDraft = (type: string) => {
-    setContractDraft({ 
-      id: Math.random().toString(36).substr(2, 9), 
-      type, 
-      documents: [], 
-      parties: [
-        { id: 'user', name: userProfile.legalName || 'أنت', role: 'الطرف الأول', isUser: true, status: 'registered' }
-      ] 
-    });
-    navigateTo(ScreenType.CONTRACT_PARTIES_SETUP);
+  const handleAISubscriptionSuccess = (plan: SubscriptionPlan) => {
+    // In a real app, update user package state
+    setWalletBalance(prev => prev - plan.price);
+    localStorage.setItem('ai_sessions_count', '0'); // Reset free sessions counter as they have a plan now
+    setCurrentScreen(ScreenType.CHAT_AI);
   };
 
   const renderScreen = () => {
@@ -101,78 +109,109 @@ const App: React.FC = () => {
       case ScreenType.WELCOME:
         return <WelcomeScreen onNext={() => navigateTo(ScreenType.SIGN_UP)} onLogin={() => navigateTo(ScreenType.LOGIN)} onGuest={() => navigateTo(ScreenType.DASHBOARD)} />;
       case ScreenType.SIGN_UP:
-        return <SignUpScreen onBack={() => navigateTo(ScreenType.WELCOME)} onSuccess={handleSignUpInit} />;
+        return <SignUpScreen onBack={() => navigateTo(ScreenType.WELCOME)} onSuccess={(d) => { setUserProfile({...userProfile, ...d}); navigateTo(ScreenType.PROFILE_SETUP); }} />;
       case ScreenType.LOGIN:
-        return <LoginScreen onBack={() => navigateTo(ScreenType.WELCOME)} onSuccess={handleAuthSuccess} />;
-      case ScreenType.OTP_VERIFICATION:
-        return <OTPVerification target={userProfile.emailOrPhone} onBack={() => navigateTo(ScreenType.SIGN_UP)} onSuccess={() => navigateTo(ScreenType.PROFILE_SETUP)} onChangeTarget={() => navigateTo(ScreenType.SIGN_UP)} />;
+        return <LoginScreen onBack={() => navigateTo(ScreenType.WELCOME)} onSuccess={(d) => { setUserProfile({...userProfile, ...d}); navigateTo(ScreenType.DASHBOARD); }} />;
       case ScreenType.PROFILE_SETUP:
-        return <ProfileSetup accountType={userProfile.accountType} onComplete={(data) => { setUserProfile(prev => ({ ...prev, ...data })); navigateTo(ScreenType.KYC_VERIFICATION); }} onSkip={() => navigateTo(ScreenType.DASHBOARD)} />;
+        return <ProfileSetup accountType={userProfile.accountType} onComplete={(d) => { setUserProfile({...userProfile, ...d}); navigateTo(ScreenType.KYC_VERIFICATION); }} onSkip={() => navigateTo(ScreenType.DASHBOARD)} />;
       case ScreenType.KYC_VERIFICATION:
-        return <KYCVerification onComplete={(status) => { setUserProfile(prev => ({ ...prev, kycStatus: status })); navigateTo(ScreenType.DASHBOARD); }} onBack={() => navigateTo(ScreenType.PROFILE_SETUP)} />;
+        return <KYCVerification onBack={() => navigateTo(ScreenType.DASHBOARD)} onComplete={(status) => { setUserProfile({...userProfile, kycStatus: status}); navigateTo(ScreenType.DASHBOARD); }} />;
+
       case ScreenType.DASHBOARD:
-        return <Dashboard user={userProfile} onLogout={() => navigateTo(ScreenType.WELCOME)} onNavigate={(screen) => navigateTo(screen)} />;
+        return <Dashboard user={userProfile} onLogout={() => navigateTo(ScreenType.WELCOME)} onNavigate={navigateTo} />;
+      
+      // Consultation Flow
       case ScreenType.CHAT_AI:
-        return <ChatAIScreen onBack={() => navigateTo(ScreenType.DASHBOARD)} user={userProfile} onFinish={(session) => { setActiveSession(session); navigateTo(ScreenType.CONSULTATION_SUMMARY); }} onNavigate={navigateTo} />;
+        return <ChatAIScreen user={userProfile} onBack={() => navigateTo(ScreenType.DASHBOARD)} onFinish={() => navigateTo(ScreenType.DASHBOARD)} onNavigate={navigateTo} />;
+      case ScreenType.AI_SESSION_PAYMENT:
+        return <AISessionPayment sessionsUsed={3} onBack={() => navigateTo(ScreenType.CHAT_AI)} onSelect={(plan) => { setSelectedPlan(plan); navigateTo(ScreenType.PAYMENT_CONFIRMATION, plan); }} />;
+      case ScreenType.PAYMENT_CONFIRMATION:
+        return <AISessionConfirmation plan={selectedPlan!} walletBalance={walletBalance} onBack={() => navigateTo(ScreenType.AI_SESSION_PAYMENT)} onSuccess={handleAISubscriptionSuccess} onChargeWallet={() => navigateTo(ScreenType.WALLET)} />;
+      case ScreenType.SUBSCRIPTION_MANAGEMENT:
+        return <SubscriptionManagement onBack={() => navigateTo(ScreenType.SETTINGS)} onNavigate={navigateTo} />;
       case ScreenType.REQUEST_HUMAN_CONSULT:
-        return <HumanConsultationRequest onBack={() => navigateTo(ScreenType.DASHBOARD)} onSubmit={(session) => { setActiveSession(session); navigateTo(ScreenType.WAITING_ROOM); }} />;
+        return <HumanConsultationRequest onBack={() => navigateTo(ScreenType.DASHBOARD)} onSelectDirect={(details) => { setConsultationContext(details); navigateTo(ScreenType.PAYMENT_DETAILS, { amount: details.price, condition: `استشارة بخصوص ${details.title}`, dueDate: 'الآن' }); }} />;
+      case ScreenType.LAWYER_SELECTION:
+        return <LawyerSelectionScreen consultationDetails={consultationContext} onBack={() => navigateTo(ScreenType.DASHBOARD)} onSelectLawyer={(l) => navigateTo(ScreenType.LAWYER_FULL_PROFILE, l)} />;
+      case ScreenType.LAWYER_FULL_PROFILE:
+        return <LawyerFullProfileScreen lawyer={selectedLawyer} isPaid={consultationContext?.isPaid} onBack={() => navigateTo(ScreenType.LAWYER_SELECTION)} onConfirmSelection={(l) => { setActiveSession({ id: 'SESS-1', type: consultationContext?.type || 'text', specialty: consultationContext?.specialty || 'عام', status: 'pending', lawyerName: l.name, lawyerAvatar: l.avatar }); navigateTo(ScreenType.WAITING_ROOM); }} />;
       case ScreenType.WAITING_ROOM:
-        return <WaitingRoom session={activeSession!} onMatched={(lawyer) => { setActiveSession(prev => ({ ...prev!, lawyerName: lawyer.name, lawyerAvatar: lawyer.avatar, status: 'live' })); navigateTo(ScreenType.LIVE_CONSULTATION); }} onCancel={() => navigateTo(ScreenType.DASHBOARD)} />;
+        return <WaitingRoom session={activeSession!} onMatched={(l) => navigateTo(ScreenType.LIVE_CONSULTATION, { ...activeSession, ...l })} onCancel={() => navigateTo(ScreenType.DASHBOARD)} />;
       case ScreenType.LIVE_CONSULTATION:
         return <LiveConsultationRoom session={activeSession!} onEnd={() => navigateTo(ScreenType.CONSULTATION_SUMMARY)} />;
       case ScreenType.CONSULTATION_SUMMARY:
-        return <ConsultationSummary session={activeSession!} onDone={() => { setActiveSession(null); navigateTo(ScreenType.DASHBOARD); }} onAction={(action) => { if (action === 'contract') navigateTo(ScreenType.CONTRACT_SELECT_TYPE); if (action === 'dispute') navigateTo(ScreenType.DISPUTE_MANAGER); if (action === 'lawyer') navigateTo(ScreenType.REQUEST_HUMAN_CONSULT); }} />;
+        return <ConsultationSummary session={activeSession!} onDone={() => navigateTo(ScreenType.DASHBOARD)} onAction={(a) => navigateTo(a === 'contract' ? ScreenType.CONTRACT_SELECT_TYPE : ScreenType.DASHBOARD)} />;
+
+      // Contracts Flow
       case ScreenType.CONTRACT_SELECT_TYPE:
-        return <ContractTypeSelection onBack={() => navigateTo(ScreenType.DASHBOARD)} onSelect={startContractDraft} />;
+        return <ContractTypeSelection onBack={() => navigateTo(ScreenType.DASHBOARD)} onSelect={(type) => { setContractDraft({...contractDraft, type}); navigateTo(ScreenType.CONTRACT_PARTIES_SETUP); }} />;
       case ScreenType.CONTRACT_PARTIES_SETUP:
-        return <ContractPartiesSetup draft={contractDraft as ContractDraft} user={userProfile} onBack={() => navigateTo(ScreenType.CONTRACT_SELECT_TYPE)} onNext={(parties) => { setContractDraft(prev => ({ ...prev, parties })); navigateTo(ScreenType.CONTRACT_TERMS); }} />;
+        return <ContractPartiesSetup draft={contractDraft as any} user={userProfile} onBack={() => navigateTo(ScreenType.CONTRACT_SELECT_TYPE)} onNext={(parties) => { setContractDraft({...contractDraft, parties}); navigateTo(ScreenType.CONTRACT_TERMS); }} onNavigate={navigateTo} />;
+      case ScreenType.PARTY_LEGAL_PROFILE:
+        return <PartyLegalProfileScreen party={selectedParty!} onBack={() => navigateTo(ScreenType.CONTRACT_PARTIES_SETUP)} onAddAsParty={(p) => { setContractDraft({...contractDraft, parties: [...(contractDraft.parties || []), p]}); navigateTo(ScreenType.CONTRACT_PARTIES_SETUP); }} onNavigate={navigateTo} />;
       case ScreenType.CONTRACT_TERMS:
-        return <ContractTermsScreen draft={contractDraft as ContractDraft} onBack={() => navigateTo(ScreenType.CONTRACT_PARTIES_SETUP)} onNext={(terms) => { setContractDraft(prev => ({ ...prev, terms })); navigateTo(ScreenType.CONTRACT_DOCUMENTS); }} />;
+        return <ContractTermsScreen draft={contractDraft as any} onBack={() => navigateTo(ScreenType.CONTRACT_PARTIES_SETUP)} onNext={(terms) => { setContractDraft({...contractDraft, terms}); navigateTo(ScreenType.CONTRACT_DOCUMENTS); }} />;
       case ScreenType.CONTRACT_DOCUMENTS:
-        return <ContractDocumentsScreen draft={contractDraft as ContractDraft} onBack={() => navigateTo(ScreenType.CONTRACT_TERMS)} onNext={(documents) => { setContractDraft(prev => ({ ...prev, documents })); navigateTo(ScreenType.AI_CONTRACT_GENERATION); }} onSaveDraft={() => navigateTo(ScreenType.DASHBOARD)} />;
+        return <ContractDocumentsScreen draft={contractDraft as any} onBack={() => navigateTo(ScreenType.CONTRACT_TERMS)} onNext={(docs) => { setContractDraft({...contractDraft, documents: docs}); navigateTo(ScreenType.AI_CONTRACT_GENERATION); }} onSaveDraft={() => navigateTo(ScreenType.DASHBOARD)} />;
       case ScreenType.AI_CONTRACT_GENERATION:
-        return <AIContractGenerationScreen draft={contractDraft as ContractDraft} onBack={() => navigateTo(ScreenType.CONTRACT_DOCUMENTS)} onFinish={(text, refs) => { setContractDraft(prev => ({ ...prev, generatedText: text, legalReferences: refs })); navigateTo(ScreenType.SMART_CONTRACT_EDITOR); }} />;
+        return <AIContractGenerationScreen draft={contractDraft as any} onBack={() => navigateTo(ScreenType.CONTRACT_DOCUMENTS)} onFinish={(text) => { setContractDraft({...contractDraft, generatedText: text}); navigateTo(ScreenType.SMART_CONTRACT_EDITOR); }} />;
       case ScreenType.SMART_CONTRACT_EDITOR:
-        return <SmartContractEditorScreen draft={contractDraft as ContractDraft} onBack={() => navigateTo(ScreenType.AI_CONTRACT_GENERATION)} onNext={(text) => { setContractDraft(prev => ({ ...prev, generatedText: text })); navigateTo(ScreenType.AI_CONTRACT_RISK_ANALYSIS); }} onSaveDraft={() => navigateTo(ScreenType.DASHBOARD)} />;
+        return <SmartContractEditorScreen draft={contractDraft as any} onBack={() => navigateTo(ScreenType.AI_CONTRACT_GENERATION)} onSaveDraft={() => navigateTo(ScreenType.DASHBOARD)} onNext={(text) => { setContractDraft({...contractDraft, generatedText: text}); navigateTo(ScreenType.AI_CONTRACT_RISK_ANALYSIS); }} />;
       case ScreenType.AI_CONTRACT_RISK_ANALYSIS:
-        return <AIContractRiskAnalysisScreen draft={contractDraft as ContractDraft} onBack={() => navigateTo(ScreenType.SMART_CONTRACT_EDITOR)} onNext={() => navigateTo(ScreenType.CONTRACT_NEGOTIATION)} />;
+        return <AIContractRiskAnalysisScreen draft={contractDraft as any} onBack={() => navigateTo(ScreenType.SMART_CONTRACT_EDITOR)} onNext={() => navigateTo(ScreenType.CONTRACT_NEGOTIATION)} />;
       case ScreenType.CONTRACT_NEGOTIATION:
-        return <ContractNegotiationScreen draft={contractDraft as ContractDraft} user={userProfile} onBack={() => navigateTo(ScreenType.AI_CONTRACT_RISK_ANALYSIS)} onFinish={() => navigateTo(ScreenType.CONTRACT_FINANCIAL_TERMS)} />;
-      case ScreenType.CONTRACT_COMMUNICATION:
-        return <ContractCommunicationScreen draft={contractDraft as ContractDraft} user={userProfile} onBack={() => navigateTo(ScreenType.COMMUNICATION_ANALYSIS)} />;
-      case ScreenType.COMMUNICATION_ANALYSIS:
-        return <CommunicationAnalysisDashboard draft={contractDraft as ContractDraft} onBack={() => navigateTo(ScreenType.CONTRACT_COMMUNICATION)} onOpenEditor={() => navigateTo(ScreenType.CONTRACT_FINANCIAL_TERMS)} />;
+        return <ContractNegotiationScreen draft={contractDraft as any} user={userProfile} onBack={() => navigateTo(ScreenType.AI_CONTRACT_RISK_ANALYSIS)} onFinish={() => navigateTo(ScreenType.CONTRACT_FINANCIAL_TERMS)} />;
       case ScreenType.CONTRACT_FINANCIAL_TERMS:
-        return <ContractFinancialTermsScreen draft={contractDraft as ContractDraft} onBack={() => navigateTo(ScreenType.CONTRACT_NEGOTIATION)} onNext={(financials) => { setContractDraft(prev => ({ ...prev, financials })); navigateTo(ScreenType.CONTRACT_FINAL_REVIEW); }} />;
+        return <ContractFinancialTermsScreen draft={contractDraft as any} onBack={() => navigateTo(ScreenType.CONTRACT_NEGOTIATION)} onNext={(fin) => { setContractDraft({...contractDraft, financials: fin}); navigateTo(ScreenType.CONTRACT_FINAL_REVIEW); }} />;
       case ScreenType.CONTRACT_FINAL_REVIEW:
-        return <ContractFinalReview draft={contractDraft as ContractDraft} onBack={() => navigateTo(ScreenType.CONTRACT_FINANCIAL_TERMS)} onNext={() => navigateTo(ScreenType.DIGITAL_SIGNATURE)} onSaveDraft={() => navigateTo(ScreenType.DASHBOARD)} />;
+        return <ContractFinalReview draft={contractDraft as any} onBack={() => navigateTo(ScreenType.CONTRACT_FINANCIAL_TERMS)} onSaveDraft={() => navigateTo(ScreenType.DASHBOARD)} onNext={() => navigateTo(ScreenType.PAYMENT_BEFORE_SIGNATURE)} />;
+      case ScreenType.PAYMENT_BEFORE_SIGNATURE:
+        return <PaymentBeforeSignature draft={contractDraft as any} onBack={() => navigateTo(ScreenType.CONTRACT_FINAL_REVIEW)} onSuccess={() => navigateTo(ScreenType.DIGITAL_SIGNATURE)} />;
       case ScreenType.DIGITAL_SIGNATURE:
-        return <DigitalSignatureCeremony draft={contractDraft as ContractDraft} user={userProfile} onBack={() => navigateTo(ScreenType.CONTRACT_FINAL_REVIEW)} onFinish={() => navigateTo(ScreenType.CONTRACT_STATUS)} />;
+        return <DigitalSignatureCeremony draft={contractDraft as any} user={userProfile} onBack={() => navigateTo(ScreenType.PAYMENT_BEFORE_SIGNATURE)} onFinish={() => navigateTo(ScreenType.CONTRACT_STATUS)} />;
       case ScreenType.CONTRACT_STATUS:
-        return <ContractStatusDashboard onBack={() => navigateTo(ScreenType.DASHBOARD)} onOpenDispute={() => navigateTo(ScreenType.OPEN_DISPUTE)} />;
-      case ScreenType.OPEN_DISPUTE:
-        return <OpenDispute onBack={() => navigateTo(ScreenType.CONTRACT_STATUS)} onConsult={() => navigateTo(ScreenType.CHAT_AI)} onSubmit={() => navigateTo(ScreenType.DISPUTE_RESOLUTION_DECISION)} />;
-      case ScreenType.DISPUTE_RESOLUTION_DECISION:
-        return <DisputeResolutionDecision onBack={() => navigateTo(ScreenType.DISPUTE_MANAGER)} onGoToContract={() => navigateTo(ScreenType.CONTRACT_STATUS)} />;
-      case ScreenType.CONTRACT_ANALYSIS:
-        return <ContractAnalysisScreen onBack={() => navigateTo(ScreenType.DASHBOARD)} />;
-      case ScreenType.DISPUTE_MANAGER:
-        return <DisputeManagerScreen onBack={() => navigateTo(ScreenType.DASHBOARD)} onNewDispute={() => navigateTo(ScreenType.OPEN_DISPUTE)} onEvaluate={() => navigateTo(ScreenType.DISPUTE_EVALUATION)} />;
-      case ScreenType.DISPUTE_EVALUATION:
-        return <DisputeEvaluationScreen onBack={() => navigateTo(ScreenType.DISPUTE_MANAGER)} />;
+        return <ContractStatusDashboard onBack={() => navigateTo(ScreenType.DASHBOARD)} onOpenDispute={() => navigateTo(ScreenType.OPEN_DISPUTE)} onNavigate={navigateTo} />;
       case ScreenType.MONITORING:
         return <MonitoringScreen onBack={() => navigateTo(ScreenType.DASHBOARD)} />;
-      case ScreenType.ESCROW_MANAGEMENT:
-        return <EscrowManagementDashboard onBack={() => navigateTo(ScreenType.DASHBOARD)} onOpenDispute={() => navigateTo(ScreenType.DISPUTE_MANAGER)} />;
+
+      // Disputes Flow
+      case ScreenType.DISPUTE_MANAGER:
+        return <DisputeManagerScreen onBack={() => navigateTo(ScreenType.DASHBOARD)} onNewDispute={() => navigateTo(ScreenType.OPEN_DISPUTE)} onEvaluate={() => navigateTo(ScreenType.DISPUTE_EVALUATION)} onNavigate={navigateTo} />;
+      case ScreenType.OPEN_DISPUTE:
+        return <OpenDispute onBack={() => navigateTo(ScreenType.DISPUTE_MANAGER)} onNext={(data, skip) => { setActiveDispute(data); navigateTo(skip ? ScreenType.DISPUTE_RESOLUTION_DECISION : ScreenType.DISPUTE_EVALUATION); }} />;
+      case ScreenType.DISPUTE_EVALUATION:
+        return <DisputeEvaluationScreen onBack={() => navigateTo(ScreenType.DISPUTE_MANAGER)} onNext={() => navigateTo(ScreenType.DISPUTE_EVIDENCE_EXCHANGE)} />;
+      case ScreenType.DISPUTE_EVIDENCE_EXCHANGE:
+        return <DisputeEvidenceExchange onBack={() => navigateTo(ScreenType.DISPUTE_MANAGER)} onFinish={() => navigateTo(ScreenType.DISPUTE_RESOLUTION_DECISION)} />;
+      case ScreenType.DISPUTE_RESOLUTION_DECISION:
+        return <DisputeResolutionDecision dispute={activeDispute} onBack={() => navigateTo(ScreenType.DASHBOARD)} onGoToContract={() => navigateTo(ScreenType.CONTRACT_STATUS)} />;
+
+      // Financial
       case ScreenType.WALLET:
         return <DigitalWallet onBack={() => navigateTo(ScreenType.DASHBOARD)} />;
+      case ScreenType.PAYMENT_DETAILS:
+        return <PaymentDetailsScreen installment={selectedInstallment!} onBack={() => navigateTo(ScreenType.DASHBOARD)} onPay={handlePaymentSuccess} />;
+      case ScreenType.ESCROW_DETAILS:
+        return <EscrowManagementDashboard onBack={() => navigateTo(ScreenType.DASHBOARD)} onOpenDispute={() => navigateTo(ScreenType.OPEN_DISPUTE)} />;
+      case ScreenType.CONTRACT_TRANSACTIONS:
+        return <ContractTransactionsScreen contractName="عقد التوريد" onBack={() => navigateTo(ScreenType.DASHBOARD)} />;
+
+      // Support
+      case ScreenType.NOTIFICATIONS:
+        return <NotificationsScreen onBack={() => navigateTo(ScreenType.DASHBOARD)} />;
+      case ScreenType.SETTINGS:
+        // Fix: added missing onNavigate prop to SettingsScreen
+        return <SettingsScreen user={userProfile} onBack={() => navigateTo(ScreenType.DASHBOARD)} onLogout={() => navigateTo(ScreenType.WELCOME)} onNavigate={navigateTo} />;
+      case ScreenType.HELP_SUPPORT:
+        return <HelpSupportScreen onBack={() => navigateTo(ScreenType.DASHBOARD)} />;
+
       default:
-        return <WelcomeScreen onNext={() => {}} onLogin={() => {}} onGuest={() => {}} />;
+        return <Dashboard user={userProfile} onLogout={() => navigateTo(ScreenType.WELCOME)} onNavigate={navigateTo} />;
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex justify-center">
+    <div className="min-h-screen bg-gray-100 flex justify-center font-['Cairo']">
       <div className="w-full max-w-md bg-white min-h-screen shadow-2xl relative overflow-hidden flex flex-col">
         {renderScreen()}
       </div>

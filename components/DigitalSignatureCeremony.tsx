@@ -5,7 +5,7 @@ import {
   CheckCircle2, Lock, Smartphone, Fingerprint, Scan, 
   ChevronLeft, Info, Bot, Clock, ExternalLink, 
   Download, FileText, Check, X, Sparkles, RefreshCw,
-  MoreVertical, ShieldAlert, Globe, Monitor
+  MoreVertical, ShieldAlert, Globe, Monitor, Printer
 } from 'lucide-react';
 import { ContractDraft, UserProfile } from '../types';
 
@@ -31,11 +31,11 @@ const DigitalSignatureCeremony: React.FC<DigitalSignatureCeremonyProps> = ({ dra
 
   // Metadata Simulation
   const metadata = {
-    timestamp: '2024-12-30, 02:30 PM',
-    location: 'الرياض، السعودية',
+    timestamp: new Date().toLocaleString('ar-SA'),
+    location: 'الرياض، المملكة العربية السعودية',
     ip: '192.168.1.104',
-    device: 'iPhone 15 Pro',
-    hash: 'SHA-256: a3f2e1...b4c5'
+    device: 'iPhone 15 Pro / منصة واثق الذكية',
+    hash: 'SHA-256: a3f2e1b4c5d6e7f890123456789abcdef0123456789abcdef0123456789ab'
   };
 
   useEffect(() => {
@@ -89,11 +89,112 @@ const DigitalSignatureCeremony: React.FC<DigitalSignatureCeremonyProps> = ({ dra
 
   const handleSign = () => {
     setIsSigning(true);
-    // Simulate Blockchain registration, hashing, and notification sync
     setTimeout(() => {
       setIsSigning(false);
       setIsSuccess(true);
     }, 4500);
+  };
+
+  // Improved Download function to match the "Wathiq" letterhead in the image
+  const handleDownloadPDF = () => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html lang="ar" dir="rtl">
+      <head>
+        <meta charset="UTF-8">
+        <title>عقد موثق - واثق</title>
+        <style>
+          @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
+          body { font-family: 'Cairo', sans-serif; margin: 0; padding: 40px; color: #1e293b; background: white; }
+          
+          /* Letterhead Header - Based on provided image */
+          .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #e2e8f0; padding-bottom: 20px; margin-bottom: 40px; }
+          .logo-area { display: flex; align-items: center; gap: 10px; }
+          .logo-icon { width: 50px; height: 50px; background: #2563eb; color: white; border-radius: 12px; display: flex; items-center; justify-content: center; font-size: 30px; font-weight: 900; }
+          .logo-text { color: #1e3a8a; }
+          .logo-text h1 { margin: 0; font-size: 32px; font-weight: 900; }
+          .logo-text p { margin: 0; font-size: 10px; font-weight: 700; letter-spacing: 1px; color: #64748b; }
+          
+          .contact-details { text-align: left; font-size: 11px; color: #475569; line-height: 1.6; }
+          .contact-details strong { color: #1e293b; font-size: 13px; }
+
+          /* Content Area */
+          .content { line-height: 2; font-size: 14px; text-align: justify; padding: 0 10px; }
+          .title { text-align: center; margin-bottom: 40px; }
+          .title h2 { font-size: 24px; font-weight: 900; color: #0f172a; border-bottom: 4px solid #3b82f6; display: inline-block; padding-bottom: 5px; }
+          
+          .clause-title { font-weight: 900; font-size: 16px; color: #1e40af; margin-top: 30px; display: block; }
+          .metadata-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; margin-top: 50px; font-size: 10px; color: #64748b; }
+          .metadata-box h4 { margin: 0 0 10px 0; color: #1e293b; font-weight: 900; text-transform: uppercase; border-bottom: 1px solid #cbd5e1; padding-bottom: 5px; }
+          
+          /* Footer - Based on provided image */
+          .footer { position: fixed; bottom: 40px; left: 40px; right: 40px; border-top: 2px solid #e2e8f0; padding-top: 15px; display: flex; justify-content: space-between; font-size: 9px; color: #94a3b8; font-weight: 700; }
+
+          @media print {
+            .no-print { display: none; }
+            body { padding: 20px; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div class="logo-area">
+            <div class="logo-text">
+              <h1>واثق</h1>
+              <p>Secure E-Contracts</p>
+            </div>
+            <div style="font-size: 40px; color: #2563eb; transform: rotate(10deg); margin-right: 10px;">✔</div>
+          </div>
+          <div class="contact-details">
+            <strong>Aramin Teten</strong><br>
+            Neto Kuff, Inatitic<br>
+            2025 1225.238<br>
+            wathiq@gmail.com
+          </div>
+        </div>
+
+        <div class="content">
+          <div class="title">
+            <h2>${draft.type || 'وثيقة قانونية'}</h2>
+            <p style="font-size: 10px; color: #94a3b8; margin-top: 5px;">الرقم المرجعي: #2024-001234 | تاريخ التوثيق: ${metadata.timestamp}</p>
+          </div>
+
+          <span class="clause-title">أطراف العقد:</span>
+          <p>${draft.parties.map((p, i) => `${i + 1}. ${p.role}: ${p.name}`).join(' | ')}</p>
+
+          <span class="clause-title">محتوى الاتفاقية:</span>
+          <p>${(draft.generatedText || 'لا يوجد نص متوفر حالياً').replace(/\n/g, '<br>')}</p>
+
+          <div class="metadata-box">
+            <h4>سجل التوثيق الرقمي (WATHIQ AUDIT TRAIL)</h4>
+            <div style="display: grid; grid-template-cols: 1fr 1fr; gap: 10px;">
+              <div>• بصمة المستند: ${metadata.hash}</div>
+              <div>• عنوان IP الموقع: ${metadata.ip}</div>
+              <div>• الجهاز المستخدم: ${metadata.device}</div>
+              <div>• الموقع الجغرافي: ${metadata.location}</div>
+              <div style="color: #059669; font-weight: 900;">• حالة التوقيع: مكتمل وموثق رقمياً عبر Blockchain ✓</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer">
+          <div>منصة واثق للعقود الإلكترونية</div>
+          <div>+1 120 566 7878</div>
+          <div>www.wathiq-contracts.com</div>
+        </div>
+
+        <script>
+          window.onload = function() { window.print(); };
+        </script>
+      </body>
+      </html>
+    `;
+
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
   };
 
   const triggerBiometric = () => {
@@ -122,7 +223,7 @@ const DigitalSignatureCeremony: React.FC<DigitalSignatureCeremonyProps> = ({ dra
         <div className="space-y-3 mb-10">
            <h2 className="text-3xl font-black text-slate-900 tracking-tight">تم التوقيع بنجاح!</h2>
            <p className="text-sm text-slate-500 font-medium leading-relaxed max-w-[300px] mx-auto">
-             تم تسجيل توقيعك وتوثيق العقد بنجاح في سجلات <span className="font-black text-blue-600">Blockchain</span> السعودية غير القابلة للتلاعب.
+             تم تسجيل توقيعك وتوثيق العقد في سجلات <span className="font-black text-blue-600">Blockchain</span> واثق غير القابلة للتلاعب.
            </p>
         </div>
 
@@ -137,33 +238,36 @@ const DigitalSignatureCeremony: React.FC<DigitalSignatureCeremonyProps> = ({ dra
               <span className="text-blue-600 font-mono truncate max-w-[150px] mr-2">0xa3f2e1b4c5d6e7f8...</span>
            </div>
            <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-slate-400">
-              <span>الختم الزمني (NTP):</span>
-              <span className="text-slate-900">2024-12-30 14:32:45 UTC</span>
+              <span>الختم الزمني (Wathiq):</span>
+              <span className="text-slate-900">{metadata.timestamp}</span>
            </div>
            <div className="pt-3 border-t border-slate-200 mt-2 flex justify-center gap-4">
               <div className="flex items-center gap-1 text-[9px] font-black text-emerald-600 uppercase">
                  <ShieldCheck size={12} /> توثيق معتمد
               </div>
               <div className="flex items-center gap-1 text-[9px] font-black text-blue-600 uppercase">
-                 <RefreshCw size={12} /> مزامنة سحابية
+                 <RefreshCw size={12} /> مزامنة آمنة
               </div>
            </div>
         </div>
 
         <div className="w-full space-y-4">
-           <button className="w-full py-5 bg-blue-600 text-white rounded-[1.8rem] font-black text-lg shadow-2xl shadow-blue-200 active:scale-95 transition flex items-center justify-center gap-3 relative overflow-hidden group">
+           <button 
+             onClick={handleDownloadPDF}
+             className="w-full py-5 bg-blue-600 text-white rounded-[1.8rem] font-black text-lg shadow-2xl shadow-blue-200 active:scale-95 transition flex items-center justify-center gap-3 relative overflow-hidden group"
+           >
               <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-              <Download size={24} /> تحميل النسخة الموقّعة
+              <Printer size={24} /> طباعة/تحميل نسخة واثق PDF
            </button>
            <div className="grid grid-cols-2 gap-3">
               <button onClick={onFinish} className="py-4 bg-slate-900 text-white rounded-[1.5rem] font-black text-xs active:scale-95 transition">العودة للرئيسية</button>
-              <button className="py-4 bg-slate-100 text-slate-600 rounded-[1.5rem] font-black text-xs hover:bg-slate-200 transition">عرض حالة العقد</button>
+              <button className="py-4 bg-slate-100 text-slate-600 rounded-[1.5rem] font-black text-xs hover:bg-slate-200 transition">عرض الحالة</button>
            </div>
         </div>
 
         <div className="mt-8 p-4 bg-blue-50/50 rounded-2xl border border-blue-100 flex items-center gap-3 animate-pulse">
            <Info size={16} className="text-blue-600" />
-           <p className="text-[10px] text-blue-800 font-bold leading-relaxed">📧 تم إرسال نسخة رسمية وكاملة لبريدك الإلكتروني المسجل.</p>
+           <p className="text-[10px] text-blue-800 font-bold leading-relaxed">📧 تم إرسال نسخة رسمية بتصميم واثق لبريدك الإلكتروني.</p>
         </div>
       </div>
     );
@@ -366,7 +470,7 @@ const DigitalSignatureCeremony: React.FC<DigitalSignatureCeremonyProps> = ({ dra
                  <p>• أقر بأنني الشخص المخول قانوناً بالتوقيع عن نفسي أو عن الكيان الذي أمثله في هذا العقد.</p>
                  <p>• قرأت وفهمت جميع بنود العقد وأوافق على الالتزام الكامل بما ورد فيه من حقوق والتزامات.</p>
                  <p>• أدرك أن هذا التوقيع الرقمي يعتبر توقيعاً معتبراً وملزماً قانوناً بموجب نظام التعاملات الإلكترونية السعودي.</p>
-                 <p>• أوافق على تسجيل تفاصيل العملية (البصمة الرقمية، الختم الزمني، الموقع) في شبكة Blockchain العامة.</p>
+                 <p>• أوافق على تسجيل تفاصيل العملية (البصمة الرقمية، الختم الزمني، الموقع) في شبكة Blockchain العامة لـ "واثق".</p>
               </div>
            </label>
 
@@ -425,34 +529,7 @@ const DigitalSignatureCeremony: React.FC<DigitalSignatureCeremonyProps> = ({ dra
               </div>
               <div className="flex items-center gap-2 text-blue-500/50 pt-2 animate-pulse">
                  <Bot size={10} />
-                 <span className="text-[8px] font-black tracking-widest">SMC-GATEWAY: READY FOR BLOCKCHAIN COMMIT</span>
-              </div>
-           </div>
-        </section>
-
-        {/* Signature Status Tracker */}
-        <section className="space-y-3 pb-8">
-           <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">👥 حالة التوقيعات الحية</h4>
-           <div className="bg-white rounded-[2.2rem] border border-slate-100 shadow-sm p-5 space-y-4">
-              <div className="flex items-center justify-between">
-                 <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-white text-[11px] font-black shadow-lg shadow-blue-100 ring-2 ring-blue-50">أ س</div>
-                    <div>
-                       <p className="text-[11px] font-black text-slate-900">أحمد السعيد (أنت)</p>
-                       <p className="text-[9px] font-bold text-blue-600 uppercase tracking-widest animate-pulse">✍️ جاري التوقيع الرقمي...</p>
-                    </div>
-                 </div>
-                 <div className="w-6 h-6 rounded-full border-2 border-blue-600 animate-spin border-t-transparent" />
-              </div>
-              <div className="flex items-center justify-between opacity-50">
-                 <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 bg-slate-200 rounded-2xl flex items-center justify-center text-slate-400 text-[11px] font-black shadow-inner">ن ت</div>
-                    <div>
-                       <p className="text-[11px] font-black text-slate-900">شركة النجاح للتقنية</p>
-                       <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">⏳ بانتظار توقيع الطرف الثاني</p>
-                    </div>
-                 </div>
-                 <Clock size={16} className="text-slate-300" />
+                 <span className="text-[8px] font-black tracking-widest">WATHIQ-GATEWAY: READY FOR BLOCKCHAIN COMMIT</span>
               </div>
            </div>
         </section>
@@ -473,7 +550,7 @@ const DigitalSignatureCeremony: React.FC<DigitalSignatureCeremonyProps> = ({ dra
                {isSigning ? (
                  <>
                    <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                   <span className="animate-pulse">جاري التوثيق على Blockchain...</span>
+                   <span className="animate-pulse">جاري التوثيق بختم "واثق"...</span>
                  </>
                ) : (
                  <>توقيع العقد الآن ✓</>
@@ -483,7 +560,7 @@ const DigitalSignatureCeremony: React.FC<DigitalSignatureCeremonyProps> = ({ dra
             <button onClick={onBack} className="flex-1 bg-slate-50 text-slate-400 rounded-[1.8rem] font-black text-xs hover:bg-slate-100 transition active:scale-95 border border-slate-100">إلغاء</button>
          </div>
          <p className="text-center text-[8px] font-black text-slate-300 uppercase tracking-tighter">
-            🔒 تشفير نهاية لنهاية • تسجيل بلوكتشين معتمد • وقت NTP رسمي • IP: {metadata.ip}
+            🔒 تشفير نهاية لنهاية • تسجيل بلوكتشين "واثق" • وقت NTP رسمي • IP: {metadata.ip}
          </p>
       </div>
 

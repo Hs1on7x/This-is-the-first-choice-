@@ -1,6 +1,10 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowRight, Send, Mic, Video, VideoOff, MicOff, PhoneOff, MessageSquare, MoreVertical, Paperclip, Clock, ShieldCheck, User, Scale } from 'lucide-react';
+import { 
+  Send, Mic, Video, VideoOff, MicOff, PhoneOff, 
+  MessageSquare, MoreVertical, Paperclip, ShieldCheck, 
+  ChevronDown, Maximize2, User
+} from 'lucide-react';
 import { ConsultationSession, Message } from '../types';
 
 interface LiveConsultationRoomProps {
@@ -14,35 +18,20 @@ const LiveConsultationRoom: React.FC<LiveConsultationRoomProps> = ({ session, on
     {
       id: '1',
       role: 'lawyer',
-      content: `أهلاً بك. أنا ${session.lawyerName || 'المحامي'}، يسعدني خدمتك اليوم. لقد قرأت تفاصيل طلبك المتعلق بـ ${session.specialty}، تفضل بطرح أسئلتك.`,
+      content: `أهلاً بك. أنا ${session.lawyerName || 'المحامي'}، يسعدني مساعدتك في استشارة ${session.specialty}. كيف يمكنني البدء؟`,
       timestamp: new Date()
     }
   ]);
   const [inputValue, setInputValue] = useState('');
-  const [timeLeft, setTimeLeft] = useState(1800); // 30 minutes
   const [videoOn, setVideoOn] = useState(true);
   const [audioOn, setAudioOn] = useState(true);
-  
   const scrollRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft(prev => (prev > 0 ? prev - 1 : 0));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
 
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages]);
-
-  const formatTime = (s: number) => {
-    const mins = Math.floor(s / 60);
-    const secs = s % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
+  }, [messages, view]);
 
   const handleSend = () => {
     if (!inputValue.trim()) return;
@@ -57,104 +46,103 @@ const LiveConsultationRoom: React.FC<LiveConsultationRoomProps> = ({ session, on
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-slate-50 animate-in slide-in-from-bottom duration-700">
-      {/* Header */}
-      <div className="p-4 bg-white border-b flex items-center justify-between sticky top-0 z-20 shadow-sm">
+    <div className="flex-1 flex flex-col bg-white overflow-hidden relative">
+      {/* Header - Fixed Height */}
+      <div className="h-16 border-b flex items-center justify-between px-4 bg-white z-30 shadow-sm">
         <div className="flex items-center gap-3">
           <div className="relative">
-            <img 
-              src={session.lawyerAvatar} 
-              className="w-10 h-10 rounded-xl border border-slate-100 object-cover" 
-              alt="Lawyer" 
-            />
-            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-white" />
+            <img src={session.lawyerAvatar} className="w-10 h-10 rounded-full border border-slate-100 object-cover" alt="Lawyer" />
+            <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white" />
           </div>
           <div>
-            <h2 className="text-sm font-bold text-slate-900">{session.lawyerName}</h2>
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{session.specialty}</p>
+            <h2 className="text-xs font-black text-slate-900 leading-tight">{session.lawyerName}</h2>
+            <p className="text-[9px] text-blue-600 font-bold uppercase tracking-widest">{session.specialty}</p>
           </div>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="flex flex-col items-center px-3 py-1 bg-red-50 text-red-600 rounded-lg">
-            <span className="text-[8px] font-black uppercase">الوقت المتبقي</span>
-            <span className="text-xs font-black font-mono leading-none">{formatTime(timeLeft)}</span>
-          </div>
-          <button className="p-2 text-slate-400 hover:text-slate-600 transition">
-            <MoreVertical size={20} />
-          </button>
+        <div className="flex items-center gap-2">
+           {view === 'chat' && session.type === 'video' && (
+             <button onClick={() => setView('video')} className="p-2 text-blue-600 bg-blue-50 rounded-xl">
+                <Maximize2 size={18} />
+             </button>
+           )}
+           <button className="p-2 text-slate-400"><MoreVertical size={20} /></button>
         </div>
       </div>
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col overflow-hidden relative">
+      {/* Main Content Area - Responsive Container */}
+      <div className="flex-1 flex flex-col overflow-hidden">
         {view === 'video' ? (
-          <div className="flex-1 bg-slate-900 relative">
-            {/* Lawyer Video View */}
+          <div className="flex-1 bg-slate-900 relative overflow-hidden animate-in fade-in duration-500">
+            {/* Main Video View (Lawyer) */}
             <div className="absolute inset-0 flex items-center justify-center">
-              <img src={session.lawyerAvatar} className="w-full h-full object-cover opacity-50 blur-lg scale-110" alt="BG" />
-              <div className="z-10 text-center space-y-4">
-                <img src={session.lawyerAvatar} className="w-32 h-32 rounded-3xl border-4 border-white/20 shadow-2xl mx-auto" alt="Avatar" />
-                <div className="space-y-1">
-                  <h3 className="text-xl font-bold">{session.lawyerName}</h3>
-                  <div className="flex items-center justify-center gap-2 text-green-400 text-xs font-bold">
-                    <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" /> متصل بجودة عالية
+               <div className="text-center space-y-6 z-10">
+                  <div className="relative inline-block">
+                    <img src={session.lawyerAvatar} className="w-32 h-32 rounded-full border-4 border-white/20 shadow-2xl mx-auto object-cover" alt="Avatar" />
+                    <div className="absolute -bottom-2 right-1/2 translate-x-1/2 bg-blue-600 text-white text-[8px] font-black px-3 py-1 rounded-full uppercase border-2 border-slate-900">Lawyer</div>
                   </div>
-                </div>
-              </div>
+                  <div className="space-y-1">
+                    <h3 className="text-lg font-black text-white">{session.lawyerName}</h3>
+                    <div className="flex items-center justify-center gap-2 text-green-400 text-[10px] font-bold uppercase tracking-widest">
+                      <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" /> اتصال مباشر مشفر
+                    </div>
+                  </div>
+               </div>
+               {/* Background Blur Effect */}
+               <img src={session.lawyerAvatar} className="absolute inset-0 w-full h-full object-cover opacity-20 blur-2xl scale-110" alt="BG" />
             </div>
             
-            {/* User PIP View */}
-            <div className="absolute top-4 left-4 w-28 h-40 bg-slate-800 rounded-2xl border-2 border-white/20 shadow-2xl overflow-hidden">
-               <div className="w-full h-full flex items-center justify-center bg-slate-700">
-                  {videoOn ? <User size={40} className="text-slate-500" /> : <VideoOff size={32} className="text-slate-600" />}
-               </div>
-               <div className="absolute bottom-2 right-2 bg-black/40 backdrop-blur-md px-2 py-0.5 rounded text-[8px] font-bold">أنت</div>
+            {/* User PIP (Small Preview) */}
+            <div className="absolute top-4 left-4 w-24 h-36 bg-slate-800 rounded-2xl border-2 border-white/10 shadow-2xl overflow-hidden z-20 transition-all active:scale-95">
+               {videoOn ? (
+                 <div className="w-full h-full bg-slate-700 flex items-center justify-center">
+                    <User size={32} className="text-slate-500" />
+                 </div>
+               ) : (
+                 <div className="w-full h-full bg-slate-900 flex items-center justify-center">
+                    <VideoOff size={24} className="text-slate-600" />
+                 </div>
+               )}
+               <div className="absolute bottom-2 left-2 bg-black/40 backdrop-blur-md px-2 py-0.5 rounded text-[7px] font-black text-white uppercase">You</div>
             </div>
 
             {/* Video Controls Overlay */}
-            <div className="absolute bottom-8 left-0 right-0 flex items-center justify-center gap-4 z-20">
-              <button onClick={() => setAudioOn(!audioOn)} className={`w-14 h-14 rounded-full flex items-center justify-center transition ${audioOn ? 'bg-white/10 text-white backdrop-blur-md' : 'bg-red-500 text-white shadow-lg'}`}>
-                {audioOn ? <Mic size={24} /> : <MicOff size={24} />}
+            <div className="absolute bottom-8 left-0 right-0 flex items-center justify-center gap-4 z-30">
+              <button onClick={() => setAudioOn(!audioOn)} className={`w-12 h-12 rounded-2xl flex items-center justify-center transition ${audioOn ? 'bg-white/10 text-white backdrop-blur-md border border-white/10' : 'bg-red-500 text-white shadow-lg shadow-red-200'}`}>
+                {audioOn ? <Mic size={20} /> : <MicOff size={20} />}
               </button>
-              <button onClick={onEnd} className="w-16 h-16 bg-red-600 text-white rounded-full flex items-center justify-center shadow-2xl shadow-red-500/20 transition active:scale-90">
-                <PhoneOff size={32} />
+              <button onClick={onEnd} className="w-16 h-16 bg-red-600 text-white rounded-3xl flex items-center justify-center shadow-2xl shadow-red-500/40 active:scale-90 transition-all group">
+                <PhoneOff size={28} className="group-hover:scale-110 transition" />
               </button>
-              <button onClick={() => setVideoOn(!videoOn)} className={`w-14 h-14 rounded-full flex items-center justify-center transition ${videoOn ? 'bg-white/10 text-white backdrop-blur-md' : 'bg-red-500 text-white shadow-lg'}`}>
-                {videoOn ? <Video size={24} /> : <VideoOff size={24} />}
+              <button onClick={() => setVideoOn(!videoOn)} className={`w-12 h-12 rounded-2xl flex items-center justify-center transition ${videoOn ? 'bg-white/10 text-white backdrop-blur-md border border-white/10' : 'bg-red-500 text-white shadow-lg shadow-red-200'}`}>
+                {videoOn ? <Video size={20} /> : <VideoOff size={20} />}
               </button>
-              <button onClick={() => setView('chat')} className="w-14 h-14 bg-white/10 text-white backdrop-blur-md rounded-full flex items-center justify-center">
-                <MessageSquare size={24} />
+              <button onClick={() => setView('chat')} className="w-12 h-12 bg-white/10 text-white backdrop-blur-md border border-white/10 rounded-2xl flex items-center justify-center">
+                <MessageSquare size={20} />
               </button>
             </div>
           </div>
         ) : (
-          <div className="flex-1 flex flex-col">
+          <div className="flex-1 flex flex-col animate-in slide-in-from-left duration-300">
             {/* Chat Messages */}
-            <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">
-              <div className="flex justify-center my-4">
-                <div className="px-4 py-1.5 bg-slate-200/50 backdrop-blur rounded-full text-[10px] font-bold text-slate-500 flex items-center gap-2">
-                   <ShieldCheck size={12} /> محادثة مشفرة ومنتهية الأطراف
+            <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50">
+              <div className="flex justify-center mb-6">
+                <div className="px-4 py-1.5 bg-white border border-slate-200 rounded-full text-[9px] font-black text-slate-400 flex items-center gap-2 uppercase tracking-widest shadow-sm">
+                   <ShieldCheck size={12} className="text-blue-500" /> جلسة آمنة تماماً
                 </div>
               </div>
               
               {messages.map((msg) => (
-                <div 
-                  key={msg.id}
-                  className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in slide-in-from-bottom-2 duration-300`}
-                >
-                  <div className={`flex gap-3 max-w-[80%] ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
-                    <div className="w-8 h-8 rounded-lg shrink-0 overflow-hidden shadow-sm">
-                      <img src={msg.role === 'user' ? 'https://api.dicebear.com/7.x/avataaars/svg?seed=User1' : session.lawyerAvatar} alt="Role" />
-                    </div>
+                <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in slide-in-from-bottom-2 duration-300`}>
+                  <div className={`flex gap-2 max-w-[85%] ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
                     <div className="space-y-1">
-                      <div className={`p-4 rounded-2xl text-sm leading-relaxed ${
+                      <div className={`p-4 rounded-[1.5rem] text-sm leading-relaxed ${
                         msg.role === 'user' 
-                        ? 'bg-blue-600 text-white rounded-tr-none shadow-md' 
+                        ? 'bg-blue-600 text-white rounded-tr-none shadow-lg shadow-blue-100' 
                         : 'bg-white text-slate-800 rounded-tl-none border border-slate-100 shadow-sm'
                       }`}>
                         {msg.content}
                       </div>
-                      <p className={`text-[9px] text-slate-400 px-1 font-medium ${msg.role === 'user' ? 'text-left' : 'text-right'}`}>
+                      <p className={`text-[8px] text-slate-300 font-bold uppercase ${msg.role === 'user' ? 'text-left' : 'text-right'}`}>
                         {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </p>
                     </div>
@@ -164,45 +152,36 @@ const LiveConsultationRoom: React.FC<LiveConsultationRoomProps> = ({ session, on
             </div>
 
             {/* Chat Input */}
-            <div className="p-4 bg-white border-t space-y-4">
-              {session.type === 'video' && (
-                <button onClick={() => setView('video')} className="w-full py-2 bg-blue-50 text-blue-600 rounded-xl text-xs font-bold flex items-center justify-center gap-2 active:scale-95 transition">
-                   <Video size={16} /> العودة لمكالمة الفيديو
-                </button>
-              )}
-              <div className="flex items-end gap-2 bg-slate-50 border border-slate-200 rounded-2xl p-2 focus-within:border-blue-500 transition-all">
-                <button className="p-2 text-slate-400 hover:text-blue-600 transition">
-                  <Paperclip size={20} />
-                </button>
+            <div className="p-4 bg-white border-t pb-8">
+              <div className="flex items-end gap-2 bg-slate-50 border border-slate-200 rounded-[1.5rem] p-2 focus-within:border-blue-400 focus-within:bg-white transition-all shadow-inner">
+                <button className="p-2 text-slate-400 hover:text-blue-600 transition"><Paperclip size={20} /></button>
                 <textarea
                   rows={1}
                   value={inputValue}
                   onChange={e => setInputValue(e.target.value)}
-                  placeholder="اكتب رسالتك للمحامي..."
-                  className="flex-1 bg-transparent border-none py-2 px-2 text-sm outline-none resize-none max-h-32"
+                  placeholder="اكتب استفسارك هنا..."
+                  className="flex-1 bg-transparent border-none py-2 px-2 text-sm font-medium outline-none resize-none max-h-32 placeholder:text-slate-400"
                 />
                 <button 
                   onClick={handleSend}
                   disabled={!inputValue.trim()}
-                  className="p-3 bg-blue-600 text-white rounded-xl shadow-lg shadow-blue-100 disabled:opacity-50 transition"
+                  className={`p-3 rounded-xl transition shadow-lg ${inputValue.trim() ? 'bg-blue-600 text-white shadow-blue-100' : 'bg-slate-200 text-slate-400'}`}
                 >
                   <Send size={20} />
                 </button>
               </div>
             </div>
+            
+            {/* End Button Floating (Only in Chat) */}
+            <button 
+              onClick={onEnd}
+              className="absolute bottom-24 left-4 w-12 h-12 bg-red-600 text-white rounded-2xl shadow-xl shadow-red-200 flex items-center justify-center hover:bg-red-700 active:scale-90 transition-all"
+            >
+              <PhoneOff size={22} />
+            </button>
           </div>
         )}
       </div>
-
-      {/* Floating Action Button for Emergency Close (Hidden in Video View) */}
-      {view === 'chat' && (
-        <button 
-          onClick={onEnd}
-          className="fixed bottom-28 left-6 w-14 h-14 bg-red-600 text-white rounded-2xl shadow-xl shadow-red-200 flex items-center justify-center hover:bg-red-700 transition active:scale-90 z-30"
-        >
-          <PhoneOff size={24} />
-        </button>
-      )}
     </div>
   );
 };

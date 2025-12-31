@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { 
   ArrowRight, FileText, Clock, CreditCard, Sparkles, AlertCircle, 
   Home, Landmark, Briefcase, Users, Box, Hammer, MapPin, 
-  Plus, Trash2, Info, ChevronDown, CheckCircle2, DollarSign
+  Plus, Trash2, Info, ChevronDown, CheckCircle2, DollarSign, ChevronLeft
 } from 'lucide-react';
 import { ContractDraft, AccountType } from '../types';
 
@@ -441,7 +441,7 @@ const ContractTermsScreen: React.FC<ContractTermsScreenProps> = ({ draft, onBack
             disabled={!canContinue}
             className={`flex-[3] py-4 rounded-[1.5rem] font-black text-lg shadow-xl transition-all ${canContinue ? 'bg-blue-600 text-white shadow-blue-200 active:scale-95' : 'bg-slate-100 text-slate-300 cursor-not-allowed'}`}
           >
-            التالي: صياغة العقد
+            التالي: رفع المستندات والأدلة
           </button>
           <button className="flex-1 bg-slate-50 text-slate-500 rounded-[1.5rem] font-bold text-[10px] flex items-center justify-center hover:bg-slate-100 transition active:scale-95">
             حفظ مسودة

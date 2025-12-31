@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { ArrowRight, Mail, Phone, Lock, Eye, EyeOff, User, Building2 } from 'lucide-react';
+import { ArrowRight, Mail, Phone, Lock, Eye, EyeOff, User, Building2, Gavel } from 'lucide-react';
 import { AccountType, UserProfile } from '../types';
 
 interface LoginScreenProps {
@@ -43,22 +43,30 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onBack, onSuccess }) => {
         <div className="space-y-4">
           <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest text-center">نوع الحساب</h3>
           {/* Account Type Toggle */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-3">
             <button
               type="button"
               onClick={() => setAccountType(AccountType.INDIVIDUAL)}
-              className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${accountType === AccountType.INDIVIDUAL ? 'border-blue-600 bg-blue-50 shadow-lg shadow-blue-50' : 'border-slate-100 bg-white'}`}
+              className={`p-3 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${accountType === AccountType.INDIVIDUAL ? 'border-blue-600 bg-blue-50 shadow-lg shadow-blue-50' : 'border-slate-100 bg-white'}`}
             >
-              <User className={accountType === AccountType.INDIVIDUAL ? 'text-blue-600' : 'text-slate-400'} size={28} />
-              <span className={`font-black text-xs ${accountType === AccountType.INDIVIDUAL ? 'text-blue-900' : 'text-slate-500'}`}>فرد (Individual)</span>
+              <User className={accountType === AccountType.INDIVIDUAL ? 'text-blue-600' : 'text-slate-400'} size={24} />
+              <span className={`font-black text-[10px] ${accountType === AccountType.INDIVIDUAL ? 'text-blue-900' : 'text-slate-500'}`}>فرد</span>
             </button>
             <button
               type="button"
               onClick={() => setAccountType(AccountType.COMPANY)}
-              className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${accountType === AccountType.COMPANY ? 'border-blue-600 bg-blue-50 shadow-lg shadow-blue-50' : 'border-slate-100 bg-white'}`}
+              className={`p-3 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${accountType === AccountType.COMPANY ? 'border-blue-600 bg-blue-50 shadow-lg shadow-blue-50' : 'border-slate-100 bg-white'}`}
             >
-              <Building2 className={accountType === AccountType.COMPANY ? 'text-blue-600' : 'text-slate-400'} size={28} />
-              <span className={`font-black text-xs ${accountType === AccountType.COMPANY ? 'text-blue-900' : 'text-slate-500'}`}>شركة (Company)</span>
+              <Building2 className={accountType === AccountType.COMPANY ? 'text-blue-600' : 'text-slate-400'} size={24} />
+              <span className={`font-black text-[10px] ${accountType === AccountType.COMPANY ? 'text-blue-900' : 'text-slate-500'}`}>شركة</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setAccountType(AccountType.LAWYER)}
+              className={`p-3 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${accountType === AccountType.LAWYER ? 'border-indigo-600 bg-indigo-50 shadow-lg shadow-indigo-50' : 'border-slate-100 bg-white'}`}
+            >
+              <Gavel className={accountType === AccountType.LAWYER ? 'text-indigo-600' : 'text-slate-400'} size={24} />
+              <span className={`font-black text-[10px] ${accountType === AccountType.LAWYER ? 'text-indigo-900' : 'text-slate-500'}`}>محامي</span>
             </button>
           </div>
         </div>

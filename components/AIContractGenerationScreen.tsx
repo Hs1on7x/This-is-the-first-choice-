@@ -26,6 +26,11 @@ const AIContractGenerationScreen: React.FC<AIContractGenerationScreenProps> = ({
     { id: 5, label: 'المراجعة النهائية', status: 'التدقيق ومطابقة الأنظمة السعودية...' }
   ];
 
+  const cleanContractText = (text: string) => {
+    // Removes markdown symbols like **, *, #, __, etc.
+    return text.replace(/\*\*|\*|#+|__|~~/g, '').trim();
+  };
+
   useEffect(() => {
     generateContract();
   }, []);
@@ -34,7 +39,6 @@ const AIContractGenerationScreen: React.FC<AIContractGenerationScreenProps> = ({
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       
-      // Initializing steps animation
       const interval = setInterval(() => {
         setStep(prev => {
           if (prev < 5) {
@@ -48,7 +52,7 @@ const AIContractGenerationScreen: React.FC<AIContractGenerationScreenProps> = ({
           setProgress(100);
           return 5;
         });
-      }, 3000);
+      }, 2000);
 
       const response = await ai.models.generateContent({
         model: 'gemini-3-pro-preview',
@@ -60,24 +64,14 @@ const AIContractGenerationScreen: React.FC<AIContractGenerationScreenProps> = ({
         المتطلبات:
         - لغة عربية فصحى قانونية رصينة.
         - بنود واضحة ومرقمة.
+        - لا تستخدم أي رموز تنسيق مثل النجوم أو الهاش (Markdown). استخدم النص الصافي فقط.
         - تضمين الديباجة، التعريفات، الالتزامات، القيمة، المدة، فض النزاعات.
-        - الاستناد لنظام المعاملات المدنية السعودي ونظام العمل إذا لزم الأمر.`,
-        config: {
-          thinkingConfig: { thinkingBudget: 2000 }
-        }
+        - الاستناد لنظام المعاملات المدنية السعودي.`,
       });
 
-      const text = response.text || "فشلت عملية التوليد.";
-      setGeneratedContent(text);
-
-      // Finish after Gemini responds and steps finish
-      setTimeout(() => {
-        onFinish(text, [
-          "نظام العمل السعودي (المواد: 50، 74، 80)",
-          "نظام المعاملات المدنية (المادة: 107)",
-          "لائحة حوكمة الشركات السعودية"
-        ]);
-      }, 5000);
+      const rawText = response.text || "فشلت عملية التوليد.";
+      const cleaned = cleanContractText(rawText);
+      setGeneratedContent(cleaned);
 
     } catch (e) {
       setError("حدث خطأ أثناء الصياغة الذكية. يرجى المحاولة مرة أخرى.");
@@ -86,7 +80,6 @@ const AIContractGenerationScreen: React.FC<AIContractGenerationScreenProps> = ({
 
   return (
     <div className="flex-1 flex flex-col bg-slate-50 animate-in fade-in duration-500 overflow-y-auto">
-      {/* Header */}
       <div className="p-4 bg-white border-b sticky top-0 z-30 shadow-sm flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button onClick={onBack} className="p-2 hover:bg-slate-100 rounded-full transition">
@@ -98,8 +91,6 @@ const AIContractGenerationScreen: React.FC<AIContractGenerationScreenProps> = ({
       </div>
 
       <div className="p-8 flex-1 flex flex-col items-center justify-center space-y-12 max-w-md mx-auto">
-        
-        {/* Main Animation */}
         <div className="relative">
           <div className="w-32 h-32 rounded-full border-4 border-blue-50 flex items-center justify-center relative overflow-hidden">
              <div 
@@ -111,7 +102,6 @@ const AIContractGenerationScreen: React.FC<AIContractGenerationScreenProps> = ({
           <Sparkles className="absolute -top-2 -right-2 text-amber-500 animate-bounce" size={24} />
         </div>
 
-        {/* Status Text */}
         <div className="text-center space-y-3">
            <h2 className="text-xl font-black text-slate-900 leading-tight">
              {progress === 100 ? '✅ تم إنشاء العقد بنجاح!' : '🤖 جارٍ إنشاء العقد...'}
@@ -119,7 +109,6 @@ const AIContractGenerationScreen: React.FC<AIContractGenerationScreenProps> = ({
            <p className="text-sm text-slate-500 font-medium h-4">{statusText}</p>
         </div>
 
-        {/* Process Steps */}
         <div className="w-full space-y-4">
            {steps.map((s) => (
              <div key={s.id} className="flex items-center justify-between group">
@@ -138,51 +127,6 @@ const AIContractGenerationScreen: React.FC<AIContractGenerationScreenProps> = ({
                 {s.id === step && <Loader2 size={14} className="text-blue-600 animate-spin" />}
              </div>
            ))}
-        </div>
-
-        {/* Generation Parameters Sidebar-ish Box */}
-        <div className="w-full p-5 bg-white rounded-3xl border border-slate-100 shadow-sm space-y-4">
-           <div className="flex items-center gap-2">
-              <ShieldCheck size={16} className="text-blue-600" />
-              <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400">معايير الصياغة</h3>
-           </div>
-           <div className="grid grid-cols-2 gap-4">
-              <div>
-                 <p className="text-[8px] font-bold text-slate-400 uppercase">النظام القانوني</p>
-                 <p className="text-[10px] font-black text-slate-900">المملكة العربية السعودية</p>
-              </div>
-              <div>
-                 <p className="text-[8px] font-bold text-slate-400 uppercase">نوع العقد</p>
-                 <p className="text-[10px] font-black text-slate-900">{draft.type}</p>
-              </div>
-              <div>
-                 <p className="text-[8px] font-bold text-slate-400 uppercase">عدد الأطراف</p>
-                 <p className="text-[10px] font-black text-slate-900">{draft.parties.length}</p>
-              </div>
-              <div>
-                 <p className="text-[8px] font-bold text-slate-400 uppercase">المدة</p>
-                 <p className="text-[10px] font-black text-slate-900">{draft.terms?.duration || 'محددة بالبنود'}</p>
-              </div>
-           </div>
-        </div>
-
-        {/* Legal References */}
-        <div className="w-full p-5 bg-indigo-50 rounded-3xl border border-indigo-100 space-y-3">
-           <div className="flex items-center gap-2">
-              <BookOpen size={16} className="text-indigo-600" />
-              <h3 className="text-[10px] font-black uppercase tracking-widest text-indigo-900">الأنظمة المرجعية</h3>
-           </div>
-           <ul className="space-y-1.5">
-              <li className="text-[9px] font-bold text-indigo-700 flex gap-2">
-                 <span className="w-1 h-1 bg-indigo-400 rounded-full mt-1.5" /> نظام المعاملات المدنية
-              </li>
-              <li className="text-[9px] font-bold text-indigo-700 flex gap-2">
-                 <span className="w-1 h-1 bg-indigo-400 rounded-full mt-1.5" /> نظام الشركات السعودي الجديد
-              </li>
-              <li className="text-[9px] font-bold text-indigo-700 flex gap-2">
-                 <span className="w-1 h-1 bg-indigo-400 rounded-full mt-1.5" /> نظام المحاكم التجارية
-              </li>
-           </ul>
         </div>
       </div>
 

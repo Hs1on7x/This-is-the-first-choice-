@@ -1,7 +1,6 @@
 
 import React, { useState } from 'react';
-// Fix: Added missing Sparkles import from lucide-react
-import { Star, CheckCircle2, FileText, Download, ArrowRight, Scale, ExternalLink, MessageCircle, Info, ChevronDown, List, BookOpen, UserPlus, AlertTriangle, ChevronLeft, Gavel, Share2, Printer, Sparkles } from 'lucide-react';
+import { Star, CheckCircle2, FileText, Download, Scale, Share2, Printer, Sparkles, ChevronLeft, Heart } from 'lucide-react';
 import { ConsultationSession } from '../types';
 
 interface ConsultationSummaryProps {
@@ -12,204 +11,115 @@ interface ConsultationSummaryProps {
 
 const ConsultationSummary: React.FC<ConsultationSummaryProps> = ({ session, onDone, onAction }) => {
   const [rating, setRating] = useState(0);
-  const [expandedSections, setExpandedSections] = useState<string[]>(['summary', 'analysis']);
+  const [comment, setComment] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const toggleSection = (id: string) => {
-    setExpandedSections(prev => 
-      prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]
-    );
-  };
-
-  const summary = session.summaryData || {
-    executiveSummary: "استشارة قانونية شاملة بخصوص نزاع عمالي وإنهاء عقد من طرف واحد.",
-    facts: ["عقد عمل لمدة ٣ سنوات", "إنهاء العلاقة بدون إنذار مسبق", "مطالبة بمستحقات مالية"],
-    parties: [{ name: "المستخدم", role: "موظف" }, { name: "شركة الحلول", role: "صاحب العمل" }],
-    analysis: [
-      { law: "نظام العمل السعودي", article: "المادة ٧٧", text: "استحقاق التعويض عن إنهاء العقد لسبب غير مشروع." }
-    ],
-    recommendations: [
-      { title: "صياغة عقد تسوية", action: "contract", type: 'contract' },
-      { title: "فتح نزاع رسمي", action: "dispute", type: 'dispute' }
-    ]
+  const handleSubmit = () => {
+    setIsSubmitting(true);
+    // Simulate API call
+    setTimeout(() => {
+      onDone(); // Navigate back to dashboard
+    }, 1500);
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-slate-50 animate-in zoom-in duration-500 pb-20">
-      {/* Header (Screen 9) */}
-      <div className="p-8 bg-blue-600 text-white text-center relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none">
-          <Scale size={240} className="absolute -bottom-10 -right-10 rotate-12" />
+    <div className="flex-1 flex flex-col bg-slate-50 animate-in fade-in duration-500 overflow-y-auto pb-8">
+      {/* Success Header */}
+      <div className="p-10 bg-indigo-600 text-white text-center relative overflow-hidden rounded-b-[3.5rem] shadow-2xl">
+        <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+          <Scale size={300} className="absolute -bottom-20 -right-20 rotate-12" />
         </div>
-        <div className="relative z-10 flex flex-col items-center gap-3">
-          <div className="px-4 py-1 bg-white/20 backdrop-blur-md rounded-full text-[10px] font-black uppercase tracking-widest border border-white/30">
-            ✓ استشارة مكتملة
+        <div className="relative z-10 flex flex-col items-center gap-4">
+          <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-3xl flex items-center justify-center border border-white/30 shadow-2xl animate-in zoom-in duration-700">
+            <CheckCircle2 size={48} className="text-white" />
           </div>
-          <h1 className="text-xl font-black">تقرير الاستشارة القانونية</h1>
-          <p className="text-blue-100 text-[10px] font-medium">
-            بتاريخ {new Date().toLocaleDateString('ar-SA')} • {session.lawyerName ? `المحامي: ${session.lawyerName}` : 'بواسطة المساعد الذكي'}
+          <h1 className="text-2xl font-black tracking-tight">اكتملت الجلسة بنجاح</h1>
+          <p className="text-indigo-100 text-xs font-medium max-w-[200px] mx-auto opacity-80 leading-relaxed">
+            شكراً لثقتك في منصتنا. نأمل أن تكون الاستشارة قد حققت توقعاتك.
           </p>
         </div>
       </div>
 
-      <div className="flex-1 p-5 space-y-6 -mt-4 bg-slate-50 rounded-t-[2.5rem] relative z-20 overflow-y-auto">
-        
-        {/* Topic & Executive Summary */}
-        <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 space-y-4">
-          <div>
-             <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">الموضوع</h4>
-             <h2 className="text-lg font-bold text-slate-900">{summary.executiveSummary.split('.')[0]}</h2>
+      <div className="p-6 space-y-8 -mt-6">
+        {/* Rating Section */}
+        <div className="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-slate-200/50 border border-white space-y-8 text-center animate-in slide-in-from-bottom duration-500">
+          <div className="space-y-2">
+            <h2 className="text-xl font-black text-slate-900">كيف تقيّم المحامي؟</h2>
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">تقييمك يساعدنا على تحسين جودة الخدمة</p>
           </div>
-          <div className="p-4 bg-blue-50/50 rounded-2xl border border-blue-100/50 flex gap-3">
-            <Info size={20} className="text-blue-600 shrink-0" />
-            <p className="text-xs text-slate-700 leading-relaxed font-medium">
-              {summary.executiveSummary}
-            </p>
-          </div>
-        </div>
-
-        {/* Facts (Screen 9 Section) */}
-        <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-          <button 
-            onClick={() => toggleSection('facts')}
-            className="w-full p-5 flex items-center justify-between hover:bg-slate-50 transition"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center">
-                <List size={18} />
-              </div>
-              <h3 className="font-bold text-slate-900 text-sm">الوقائع المجمّعة</h3>
-            </div>
-            <ChevronDown size={18} className={`text-slate-400 transition-transform ${expandedSections.includes('facts') ? 'rotate-180' : ''}`} />
-          </button>
-          {expandedSections.includes('facts') && (
-            <div className="px-5 pb-5 space-y-4 animate-in slide-in-from-top duration-300">
-              <ul className="space-y-3">
-                {summary.facts.map((fact, i) => (
-                  <li key={i} className="flex gap-3 text-sm text-slate-600">
-                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-2 shrink-0" />
-                    {fact}
-                  </li>
-                ))}
-              </ul>
-              <div className="pt-4 border-t border-slate-50">
-                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">الأطراف:</p>
-                 <div className="flex flex-wrap gap-2">
-                    {summary.parties.map((p, i) => (
-                      <span key={i} className="px-3 py-1 bg-slate-100 rounded-lg text-xs font-bold text-slate-700">
-                         {p.name} ({p.role})
-                      </span>
-                    ))}
-                 </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Analysis & Legal Articles (Screen 9 Section) */}
-        <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-          <button 
-            onClick={() => toggleSection('analysis')}
-            className="w-full p-5 flex items-center justify-between hover:bg-slate-50 transition"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center">
-                <BookOpen size={18} />
-              </div>
-              <h3 className="font-bold text-slate-900 text-sm">التحليل والرأي القانوني</h3>
-            </div>
-            <ChevronDown size={18} className={`text-slate-400 transition-transform ${expandedSections.includes('analysis') ? 'rotate-180' : ''}`} />
-          </button>
-          {expandedSections.includes('analysis') && (
-            <div className="px-5 pb-5 space-y-4 animate-in slide-in-from-top duration-300">
-              <p className="text-sm font-bold text-slate-800">الأنظمة ذات الصلة:</p>
-              {summary.analysis.map((item, i) => (
-                <div key={i} className="p-4 bg-slate-50 rounded-2xl border border-slate-200 group relative">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[10px] font-black text-blue-700">{item.law}</span>
-                    <span className="text-[10px] font-bold text-slate-400">{item.article}</span>
-                  </div>
-                  <p className="text-xs text-slate-700 leading-relaxed italic">"{item.text}"</p>
-                  <button className="absolute -bottom-2 -left-2 bg-white shadow-sm border p-1 rounded-lg opacity-0 group-hover:opacity-100 transition">
-                     <ExternalLink size={12} className="text-blue-600" />
-                  </button>
-                </div>
-              ))}
-              <div className="pt-2 p-4 bg-emerald-50 rounded-2xl border border-emerald-100">
-                <p className="text-xs font-bold text-emerald-900 leading-relaxed">
-                   الرأي: بناءً على الأنظمة المذكورة، يحق لك المطالبة بالتعويض وتصفية كافة مستحقاتك المالية نظراً لعدم وجود سبب مشروع للإنهاء.
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Recommendations (Screen 9 Section) */}
-        <section className="space-y-4">
-          <h3 className="font-bold text-slate-900 text-sm px-1 flex items-center gap-2">
-            <Sparkles size={16} className="text-amber-500" /> الخطوات المقترحة
-          </h3>
-          <div className="grid grid-cols-1 gap-3">
-            {summary.recommendations.map((rec, i) => (
+          
+          <div className="flex justify-center gap-3">
+            {[1, 2, 3, 4, 5].map((s) => (
               <button 
-                key={i}
-                onClick={() => onAction(rec.type)}
-                className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-3xl group hover:border-blue-600 transition shadow-sm active:scale-95"
+                key={s} 
+                onClick={() => setRating(s)}
+                className={`transition-all duration-300 transform ${s <= rating ? 'scale-125 text-amber-400' : 'text-slate-200 hover:text-slate-300'}`}
               >
-                <div className="flex items-center gap-4 text-right">
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg ${
-                    rec.type === 'contract' ? 'bg-blue-600 shadow-blue-100' :
-                    rec.type === 'dispute' ? 'bg-slate-800 shadow-slate-100' :
-                    'bg-indigo-600 shadow-indigo-100'
-                  }`}>
-                    {rec.type === 'contract' ? <FileText size={20} /> : 
-                     rec.type === 'dispute' ? <Gavel size={20} /> : <UserPlus size={20} />}
-                  </div>
-                  <div>
-                    <p className="text-xs font-black text-slate-900">{rec.title}</p>
-                    <p className="text-[9px] text-slate-400">تنفيذ الإجراء فوراً</p>
-                  </div>
-                </div>
-                <ChevronLeft size={18} className="text-slate-300 group-hover:text-blue-600 transition" />
+                <Star size={44} fill={s <= rating ? 'currentColor' : 'none'} strokeWidth={2} />
               </button>
             ))}
           </div>
-        </section>
 
-        {/* Rating Section */}
-        {session.lawyerName && (
-          <div className="text-center space-y-4 pt-6 border-t border-slate-200">
-            <h3 className="font-bold text-slate-900">كيف كانت تجربتك؟</h3>
-            <div className="flex justify-center gap-2">
-              {[1, 2, 3, 4, 5].map((s) => (
-                <button 
-                  key={s} 
-                  onClick={() => setRating(s)}
-                  className={`transition-all duration-300 ${s <= rating ? 'scale-110' : 'opacity-30 hover:opacity-50'}`}
-                >
-                  <Star size={32} fill={s <= rating ? '#f59e0b' : 'none'} className={s <= rating ? 'text-amber-500' : 'text-slate-400'} />
-                </button>
-              ))}
-            </div>
+          <div className="space-y-4 text-right">
+             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">رأيك الشخصي (اختياري)</label>
+             <textarea 
+               value={comment}
+               onChange={e => setComment(e.target.value)}
+               placeholder="اكتب هنا تجربتك مع المحامي..."
+               className="w-full h-32 bg-slate-50 border border-slate-100 rounded-[1.8rem] p-5 text-sm font-medium focus:bg-white focus:ring-4 focus:ring-indigo-100 outline-none transition shadow-inner resize-none"
+             />
           </div>
-        )}
-      </div>
+        </div>
 
-      {/* Footer Actions */}
-      <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-4 bg-white/80 backdrop-blur-md border-t flex gap-3 z-30">
-        <button 
-          onClick={onDone}
-          className="flex-1 py-4 bg-slate-900 text-white rounded-2xl font-bold text-sm shadow-xl transition active:scale-95"
-        >
-          العودة للرئيسية
-        </button>
-        <div className="flex gap-2">
-           <button className="p-4 bg-slate-100 text-slate-700 rounded-2xl transition hover:bg-slate-200 active:scale-95">
-              <Share2 size={20} />
-           </button>
-           <button className="p-4 bg-slate-100 text-slate-700 rounded-2xl transition hover:bg-slate-200 active:scale-95">
-              <Printer size={20} />
+        {/* Lawyer Info Summary */}
+        <div className="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm flex items-center justify-between">
+           <div className="flex items-center gap-4">
+              <img src={session.lawyerAvatar} className="w-12 h-12 rounded-2xl object-cover border border-slate-50" alt="L" />
+              <div>
+                 <h4 className="text-sm font-black text-slate-900">{session.lawyerName}</h4>
+                 <p className="text-[9px] font-bold text-slate-400">{session.specialty}</p>
+              </div>
+           </div>
+           <div className="bg-emerald-50 text-emerald-600 p-2 rounded-xl">
+              <Heart size={20} fill="currentColor" />
+           </div>
+        </div>
+
+        {/* Recommendation Step */}
+        <div className="p-6 bg-slate-900 rounded-[2.5rem] text-white space-y-4 shadow-2xl relative overflow-hidden group">
+           <div className="absolute top-0 right-0 w-24 h-24 bg-blue-600/20 rounded-full blur-2xl" />
+           <div className="flex items-center gap-3">
+              <Sparkles className="text-blue-400" size={20} />
+              <h4 className="text-xs font-black uppercase tracking-widest text-blue-300">الخطوة القادمة المقترحة</h4>
+           </div>
+           <p className="text-[11px] text-slate-300 font-medium leading-relaxed pr-1">
+             بناءً على نتائج الجلسة، يقترح المساعد الذكي البدء في صياغة "عقد تسوية" لحفظ حقوقك القانونية.
+           </p>
+           <button 
+             onClick={() => onAction('contract')}
+             className="w-full py-3.5 bg-blue-600 text-white rounded-2xl font-black text-xs shadow-lg active:scale-95 transition"
+           >
+             بدء صياغة العقد المقترح
            </button>
         </div>
+      </div>
+
+      {/* Final Action Button */}
+      <div className="p-6 bg-transparent">
+         <button 
+           onClick={handleSubmit}
+           disabled={isSubmitting || rating === 0}
+           className={`w-full py-5 rounded-[2rem] font-black text-lg shadow-2xl transition-all flex items-center justify-center gap-3 relative overflow-hidden ${
+             rating > 0 ? 'bg-indigo-600 text-white shadow-indigo-200 active:scale-95' : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+           }`}
+         >
+            {isSubmitting ? (
+              <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
+              <>إرسال والعودة للرئيسية <ChevronLeft size={24} /></>
+            )}
+            <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+         </button>
       </div>
     </div>
   );
