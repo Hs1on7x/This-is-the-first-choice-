@@ -98,9 +98,8 @@ const App: React.FC = () => {
   };
 
   const handleAISubscriptionSuccess = (plan: SubscriptionPlan) => {
-    // In a real app, update user package state
     setWalletBalance(prev => prev - plan.price);
-    localStorage.setItem('ai_sessions_count', '0'); // Reset free sessions counter as they have a plan now
+    localStorage.setItem('ai_sessions_count', '0'); 
     setCurrentScreen(ScreenType.CHAT_AI);
   };
 
@@ -200,7 +199,6 @@ const App: React.FC = () => {
       case ScreenType.NOTIFICATIONS:
         return <NotificationsScreen onBack={() => navigateTo(ScreenType.DASHBOARD)} />;
       case ScreenType.SETTINGS:
-        // Fix: added missing onNavigate prop to SettingsScreen
         return <SettingsScreen user={userProfile} onBack={() => navigateTo(ScreenType.DASHBOARD)} onLogout={() => navigateTo(ScreenType.WELCOME)} onNavigate={navigateTo} />;
       case ScreenType.HELP_SUPPORT:
         return <HelpSupportScreen onBack={() => navigateTo(ScreenType.DASHBOARD)} />;

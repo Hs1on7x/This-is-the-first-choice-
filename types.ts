@@ -33,7 +33,6 @@ export enum ScreenType {
   WALLET = 'WALLET',
   CONTRACT_FINAL_REVIEW = 'CONTRACT_FINAL_REVIEW',
   PAYMENT_BEFORE_SIGNATURE = 'PAYMENT_BEFORE_SIGNATURE',
-  /* New Monetization Screens */
   AI_SESSION_PAYMENT = 'AI_SESSION_PAYMENT',
   SUBSCRIPTION_MANAGEMENT = 'SUBSCRIPTION_MANAGEMENT',
   DIGITAL_SIGNATURE = 'DIGITAL_SIGNATURE',
@@ -190,12 +189,29 @@ export interface ContractDraft {
   documents?: ContractFile[];
   generatedText?: string;
   legalReferences?: string[];
+  addressInfo?: {
+    country: string;
+    city: string;
+    district: string;
+    street: string;
+    buildingNo: string;
+    lat?: number;
+    lng?: number;
+    matchRate?: number;
+    deedNo?: string;
+    deedVerified?: boolean;
+    propertyType?: string;
+    area?: number;
+    rooms?: number;
+    floor?: number;
+  };
 }
 
 export interface ContractParty {
   id: string;
   name: string;
-  role: string;
+  role: string; // The generic role (e.g. Party 1, Party 2)
+  specificRole?: string; // The business role (e.g. Lessor, Tenant, Client, Provider)
   email?: string;
   phone?: string;
   status: 'registered' | 'pending' | 'manual';
@@ -204,6 +220,7 @@ export interface ContractParty {
   rating?: number;
   completionRate?: number;
   contractCount?: number;
+  share?: number; // For partnership contracts
 }
 
 export interface ContractFile {
@@ -215,34 +232,41 @@ export interface ContractFile {
   hash: string;
   timestamp: string;
   status: 'uploading' | 'analyzing' | 'done' | 'error';
+  uploadedBy?: string; // Party ID
+  isShared?: boolean;
+  isConfirmedByOther?: boolean;
   aiAnalysis?: {
     summary: string;
     extractedInfo: string[];
+    isMatch?: boolean;
+    verificationDetails?: string;
   };
 }
 
+/**
+ * Added missing member 'DisputeCase'
+ */
 export interface DisputeCase {
   id: string;
   title: string;
   type: string;
-  claimantName?: string;
-  defendantName?: string;
-  subject?: string;
-  description?: string;
-  status: 'court' | 'arbitration' | 'mediator_assigned' | 'closed';
+  status: string;
+  claimantName: string;
+  defendantName: string;
   successProbability: number;
   lastUpdate: string;
   nextStep: string;
-  evidence: {
-    type: 'doc' | 'chat' | 'file';
-    title: string;
-    aiInsight: string;
-  }[];
+  evidence: { type: string; title: string; aiInsight: string }[];
+  subject?: string;
+  description?: string;
 }
 
+/**
+ * Added missing member 'ContractRisk'
+ */
 export interface ContractRisk {
   id: string;
-  severity: 'low' | 'medium' | 'high';
+  severity: 'high' | 'medium' | 'low';
   title: string;
   description: string;
   clause: string;
@@ -251,6 +275,9 @@ export interface ContractRisk {
   type: string;
 }
 
+/**
+ * Added missing member 'MissingClause'
+ */
 export interface MissingClause {
   label: string;
   status: 'present' | 'absent' | 'warning';
@@ -258,6 +285,9 @@ export interface MissingClause {
   description: string;
 }
 
+/**
+ * Added missing member 'ClauseAnalysis'
+ */
 export interface ClauseAnalysis {
   id: string;
   title: string;
@@ -266,6 +296,9 @@ export interface ClauseAnalysis {
   recommendation?: string;
 }
 
+/**
+ * Added missing member 'NegotiationProposal'
+ */
 export interface NegotiationProposal {
   id: string;
   clauseId: string;
@@ -277,6 +310,9 @@ export interface NegotiationProposal {
   isOwn: boolean;
 }
 
+/**
+ * Added missing member 'AnalysisReport'
+ */
 export interface AnalysisReport {
   id: string;
   contractName: string;
@@ -297,7 +333,7 @@ export interface AnalysisReport {
     id: string;
     date: string;
     title: string;
-    status: 'resolved' | 'unresolved';
+    status: string;
     parties: { role: string; stance: string }[];
   }[];
   suggestedAmendments: {
